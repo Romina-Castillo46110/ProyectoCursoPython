@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+
+{% block contenido %}
+
+    <h2>Nuevo usuario</h2>
+    <form action="" method="POST"> <!--el request se hace al mismo lugar si dejamos el action vacío-->
+        {% csrf_token %}
+        {{ form.as_p}}
+        <button>Registrar</button>
+    </form>
+
+{% endblock %}

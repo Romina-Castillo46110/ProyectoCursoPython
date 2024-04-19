@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block contenido %}
+    <form action="alta_alumno" method="POST">
+        {% csrf_token %}
+        <p>Nombre:</p>
+        <input type="text" name="nombre" required>
+        <p>Legajo:</p>
+        <input type="number" name="legajo" required>
+        <button>Enviar</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,368 @@
+Tengo mi app principal: terceraEntrega
+Esta app principal es la que se encarga de manejar mis otras apps
+Con el comando: python manage.py startapp AppCoder
+Creo mi app secundaria: AppCoder
+Debo avisarle al proyecto que agregue una nueva aplicacion, eso se
+hace desde el archivo settings que esta en la aplicacion principal
+En settings busco installed apps y agrego entre comillas el nombre
+de la aplicacion, no olvidar la coma y las comillas.
+Models en python:
+En el contexto del patrón de diseño MVT (Modelo-Vista-Templado)
+los "modelos" representan la capa de datos de la aplicación.
+son clases de Python que definen la estructura y el comportamiento
+de los datos que serán almacenados en la base de datos
+Cada modelo se corresponde con una tabla en la base de datos y define los campos de esa tabla.
+Los modelos de Django incluyen campos que representan los distintos tipos de datos que pueden ser
+almacenados en la base de datos, también proporciona relaciones entre modelos, lo que permite
+definir relaciones de uno a uno, uno a muchos y muchos a muchos entre las tablas de la base de datos.
+Pueden contener métodos que proporcionan funcionalidades adicionales, como la validación de datos,
+la manipulación de datos antes de guardarlos en la base de datos, y la definición de métodos
+personalizados para realizar consultas o manipulaciones de datos específicas.
+Nota: la base de datos que usaremos es SQL, que tienen la caracteristica de que la informacion se
+almacena en informacion tabulada. Dentro de models, y de la clase, digo como se van a conformar la
+tabla a donded se van a insertar los datos a futuro.
+En el archivo models.py creamos las clases
+- Cursos: En la aplicación lo que quiero hacer es administrar cursos, registrar, eliminar
+  modificar, es decir, un ABM. Antes de esto debo decir cómo estructurar los datos de esta
+  entidad.
+  Este curso hereda del módulo models, la clase Model, que es la clase padre, heredamos de esta porque
+  heredamos varias funcionalidades (limpieza de datos, checkeo de datos ingresados, cómo guardar en base
+  de datos, etc).
+  Dentro de la clase curso, defino la estructura de datos (como se va a estructurar la clase en la base
+  de datos), inserto datos en la tabla creada. En este caso hay una tabla llamada Curso que tiene dentro
+  dos columnas: nombre y camada, y una tercera que se agrega automaticamente llamada ID. Todas las tablas
+  en SQL siempre necesitan una columna principal, que es lo que se conoce como primary key o llave primaria
+  que tiene que ser un valor único
+  Defino el tipo de datos que tendrá nombre y camada, invocando models punto el tipo. Por ejemplo, para
+  nombre: models.CharField y para camada: models.IntegerField
+Para checkear que todo este bien, con el comando: python manage.py check nombre_aplicacion_secundaria
+Una vez tengamos las clases definidas en models, se realiza la migracion.
+Las migraciones son archivos de Python que Django utiliza para actualizar la estructura de la base de datos
+para que coincida con mis modelos. Transforma los modelos en un archivo que queda dentro de la carpeta migraciones
+Es como un back up de todos los modelos creados. Sirve para cambiar el estado de la base de datos, actualizarla,
+volver a un estado anterior, etc.
+Hasta acá queda listo para cuando quiera volcarlo a la base de datos, hasta entonces solo es un back up.
+Estas migraciones se hacen por medio del comando: python manage.py makemigrations
+Y el archivo que se crea, puede tener como nombre: 0001_initial.py por ejemplo, el nombre se pone automáticamente
+Podemos ver que se le ha agregado a la tabla, dentro de models, se ha agregado la columna id a Curso.
+Todavía la base de datos no ha sido afectada, para esto, con el comando: python manage.py migrate
+
+URLS:
+En mi aplicacion secundaria, como no tiene un archivo url, lo creamos. Para definir las url de mi aplicacion
+Importante, hacer la importacion: from django.urls import path y from . import Views
+urlpatterns = {
+    defino las url de mi app
+    hago uno que sea altacurso, y le mando un parámetro que es nombre
+    path("altacurso/<nombre>", views.altacurso)
+}
+Esta es una ruta de mi aplicacion secundaria, pero ya tengo una aplicacion principal, por lo que el que se encargue de hacer
+toda la redireccion global, lo va hacer mi app principal. Hay que trabajar las rutas también desded la clase principal
+Debo decirle que tengo una nueva app con sus propias rutas, esto se hace dentro del archivo url de la clase principal e importo
+la funcion include, from django.urls import path, include
+Le agrego un nuevo path que sera: nombre, y le digo que incluya la secundaria. Así las url de la secundaria son visibles en la primaria
+path("AppCoder/", include("Appcoder.urls"))
+
+Existen dos tipos distintos de urls:
+    Rutas Relativas:
+        Las rutas relativas especifican la ubicación de un recurso con respecto al directorio actual o al directorio de origen del archivo que contiene la referencia.
+        Son más cortas y generalmente más fáciles de mantener.
+        Son útiles cuando se trabaja dentro de la misma estructura de directorios.
+        No comienzan con una barra (/) ni un esquema (http://), lo que indica que se refieren a una ubicación relativa dentro del sistema de archivos.
+        Ejemplo de ruta relativa en una estructura de directorios:
+        /carpeta/pagina.html
+    Rutas Absolutas:
+        Las rutas absolutas especifican la ubicación completa de un recurso dentro del sistema de archivos, comenzando desde la raíz del sistema de archivos o desde el dominio web.
+        Son menos propensas a errores, ya que siempre apuntan al mismo recurso, independientemente del contexto.
+        Son útiles cuando se necesita hacer referencia a recursos ubicados en diferentes partes del sistema de archivos o en diferentes dominios web.
+        Comienzan con una barra (/) o un esquema (http://), indicando la ruta completa desde la raíz del sistema de archivos o el dominio web.
+        Ejemplo de ruta absoluta:
+        /home/usuario/carpeta/pagina.html
+Se usan dependiendo el contexto
+
+
+VIEWS:
+Las vistas son funciones o métodos en el código de la aplicación
+que se encargan de manejar las solicitudes HTTP. Una vista recibe una
+solicitud HTTP, procesa los datos necesarios y luego devuelve una respuesta al
+cliente. En el caso de utilizar un motor de plantillas, una vista puede cargar un
+template, combinarlo con los datos requeridos y devolver la respuesta HTML generada.
+Ahora se hace la view que maneje esa url: que en este caso seria altacurso. Esto se define como funcion dentro del archivo
+views de la app secundaria.
+
+A esta funcion le va a llegar por parámetro el atributo nombre y request.
+Importante: importar el modelo dentro del archivo views: from AppCoder.models import Curso
+Importo la clase curso de mi modelo
+
+Creo un curso con el constructor de la clase, y le paso como nombre, el nombre que llegue y una camada.
+Como la clase modelo tiene toda la funcionalidad para trabajar con la base de datos, y ya que Curso hereda de models, entonces puedo usaremos
+curso.save(), esto genera un nuevo registro en la base de datos.
+Luego mediante un texto, fstring mando un mensaje de que se guardó correctamente. y retorno el texto por HttpResponse.
+Importante: importar HttpResponse: from django.http import HttpResponse
+
+HTTP:
+Es un protocolo de comunicacion para la transferencia de datos. En el contexto de HTTP, una solicitud (request) y una respuesta (response) son
+dos tipos de mensajes intercambiados entre un cliente (como un navegador web) y un servidor web.
+    - Solicitud (Request): Es un mensaje enviado por un cliente a un servidor para solicitar un recurso específico. Una solicitud HTTP generalmente
+      incluye información como el método de solicitud (GET, POST, PUT, DELETE, etc.), la URL del recurso solicitado, los encabezados de la solicitud
+      que proporcionan información adicional sobre la solicitud y opcionalmente el cuerpo de la solicitud que contiene datos como parámetros de
+      formulario en el caso de una solicitud POST.
+    - Respuesta (Response): Es un mensaje enviado por un servidor en respuesta a una solicitud recibida. Una respuesta HTTP incluye un código de
+      estado que indica si la solicitud fue exitosa, un encabezado de respuesta que proporciona información adicional sobre la respuesta y opcionalmente
+      el cuerpo de la respuesta que contiene los datos solicitados.
+Los códigos de estado más comunes en las respuestas HTTP incluyen:
+    - 200 OK: Indica que la solicitud fue exitosa.
+    - 404 Not Found: Indica que el recurso solicitado no fue encontrado en el servidor.
+    - 500 Internal Server Error: Indica que ocurrió un error interno en el servidor al procesar la solicitud.
+En resumen, una solicitud HTTP es un mensaje enviado por un cliente para solicitar un recurso, mientras que una respuesta HTTP es un mensaje enviado por
+un servidor en respuesta a esa solicitud. Estos mensajes forman la base de la comunicación entre clientes y servidores en la web.
+
+TEMPLATE:
+Creamos un path vacío y le ponemos a la view de nombre inicio. Esto dentro de urlpatterns en el archivo url de AppCoder.
+En view debemos agregar para que se encargue de responder
+def inicio (request):
+    return render(request, "plantilla.html")
+Cuando llega la petición voy a hacer un render del documento html y lo retorno.
+Render quiere decir, mostrar, o visualizar, cuando se genera, lo que manda es el resultado del render.
+Todo lo dinamico que uno haga en el template va a suceder del lado servidor, la respuesta que esta enviando el servidor.
+El return render es el response, la respuesta que está enviando el servidor.
+Cuando uno ingresa la url, hago un request (peticion) al servidor. Lo primero que va a captar es el ruter, está llegando una petición a esta determinada ruta
+Cuando llega esa peticion lo tengo que manejar con tal view, llama a la view y le manda el request, porque ese request es un objeto, tiene datos sobre la petición
+que hizo el usuario, la forma en que lo hizo, si mando tal cosa, etc.
+
+Ahora creamos una carpeta dentro de la app AppCoder, llamda template. Dentro creamos un archivo html llamado plantilla.html
+Lo que hace la view es responder con la plantilla renderizada, le manda un resultado de la plantilla. No se envia el html así como viene.
+En settings, agregamos en Templates, agregamos en DIRS la ruta a la carpeta template, RECORDAR DAR VUELTA LAS BARRAS. Y al final colocar una barra.
+Acá estamos utilizando el motor de template de Django
+La peticion se hace por medio de la url, esta invoca a la view, va a trabajar con el modelo y con el tamplate.
+Si la view necesita un determinado template, pero a ese template le tiene que insertar datos, entonces trae el template, los datos del modelo, posiblemente haga un render
+que es la inserccion de datos al template y despues va a retornar el resultado
+Recordar que el template es un documento html, es la parte visual, de lo que ve el usuario
+
+BOOTSTRAP:
+Es un template de bootstrap con el que vamos a trabajar. Es un sitio hecho con Bootstrap.
+Bootstrap es un framework de css para dar estilos.
+Lo utilizamos porque ya viene armado, y solo le cambiamos valores.
+Por eso es un template es una plantilla que uno utiliza para ahorrarse trabajo
+Al abrir la carpeta descargada del template de bootstrap podemos ver distintas cosas:
+    -Archivo index, que es el html
+    -Carpeta Js, que es javaScript, es la carpeta que le va a dar funcionalidad
+    -Carpeta css, que es un lenguaje de tipo gráfico, encargado de darle estilo, porque el documento html solo no va a tener estilo, será algo en blanco y negro
+    -Carpeta Assets, donde tendremos: Casi siempre suelen estar las imagenes, los iconos, seria el extra de la página
+
+STATIC:
+En proyectos de Python, especialmente en aplicaciones web, es común utilizar una carpeta llamada "static" para almacenar archivos estáticos, como hojas de estilo
+CSS, scripts de JavaScript, imágenes y otros recursos que no requieren procesamiento del lado del servidor.
+El propósito de tener una carpeta "static" es separar claramente los archivos estáticos de otros archivos del proyecto y servirlos de manera eficiente a través del
+servidor web que se esté utilizando. Esta carpeta puede estar ubicada en el directorio raíz del proyecto o dentro de la estructura de directorios de la aplicación
+web, dependiendo de la organización del proyecto.
+Cuando se sirve una página web desde el servidor, el servidor web estará configurado para servir los archivos estáticos desde la carpeta "static" de manera eficiente,
+sin necesidad de que el servidor procese la lógica del lado del servidor para estos archivos. Esto mejora el rendimiento y la eficiencia de la aplicación web.
+Entonces, dentro de la carpeta de la app secundaria creo una carpeta llamada static. Donde dentro tendrá una carpeta con el nombre de mi app secundaria. Dentro de esta, copiamos lo que
+acabamos de descargar, las carpetas y archivo index anteriormente mencionados
+No importa la ruta, porque si los archivos no están en un disco c se rompe todo, para esto está la carpeta static.
+
+HERENCIA EN HTML:
+La herencia de plantillas en HTML es una técnica comúnmente utilizada en muchos frameworks web para crear un diseño consistente y modular en un sitio web. Este enfoque permite definir
+una plantilla base con elementos estructurales y de diseño comunes, y luego crear plantillas secundarias que heredan de la plantilla base y pueden sobrescribir o extender secciones
+específicas según sea necesario.
+En este ejemplo:
+{% extends 'padre.html' %} indica que plantilla.html hereda de padre.html.
+{% block title %}
+...
+{% endblock %} y
+{% block content %}
+...
+{% endblock %}
+se utilizan para definir bloques en la plantilla padre que pueden ser sobrescritos o extendidos en las plantillas secundarias.
+Cuando renderizas plantilla.html, el motor de plantillas remplazará el contenido de los bloques definidos en padre.html con el contenido especificado en plantilla.html, lo que resultará
+en una página completa con la estructura definida en la plantilla padre y el contenido adicional de la plantilla secundaria.
+Creamos un template llamado Padre donde voy a derivar todos mis otros template. Es el template base
+Hacemos una copia del index de static y lo pegamos en padre.
+En views de la app secundaria, reemplazamos plantilla por padre.
+Dentro de la plantilla padre, y dentro de head, y colocamos: { % load static % }
+Dentro de <link href="css/styles.css" rel="stayleshoot" /> borramos el contenido de href y lo reemplazamos por:
+{% static 'NombreAppSecundaria/css/styles.css' %} Lo que digo acá es que, de la carpeta static voy a entrar a la carpeta AppCoder por ejemplo, y de AppCoder a la carpeta css
+y dentro de esta carpeta, selecciona el archivo styles.css
+Entonces static está para poder acceder a los recursos de manera global, siempre van a estar en static
+Luego de static RECORDAR PONER COMILLAS SIMPLES, SI SON DOBLES EL STRING SE ESCAPA
+
+En la plantilla padre, dentro de header colocamos:
+<!-- INICIO CONTENIDO --!>
+{% block contenido %}
+    Dentro de este bloque va nuestro código propio, el dinamismo. Porque por el momento nuestra plantilla es estática.
+    Para reutilizar código se hace dentro de Padre, que es la base que va a heredar todas las plantillas.
+    Este sería como el main de cada archivo html que tendremos, así lo comun a todas heredan de padre pero cada una tendrá su
+    particularidad por medio de este bloque de código.
+{% endblock %}
+<!-- FIN CONTENIDO --!>
+
+Creamos un nuevo template llamado Curso que se va a cargar cuando se llame dentro de la view para mandar la respuesta
+Y hacemos que herede de Padre
+
+Desde la view al template mando un conjunto de datos, para que el template, en este caso template Cursos, recorra esos datos.
+Los inserte en el html y despues lo retorne para que el usuario lo vea.
+Esto de recorrer datos, o bucles, no lo puedo hacer con html porque es un lenguaje de etiquetas, pero Django me da la posibilidad de que a pesar de que mi html siga estático pueda implementarle logica arriba a través de mi template
+Agregamos el for dentro del bloque de contenido en el html de cursos
+{% block contenido %}
+    {% for n in cursos %}
+        <p>{{n.nombre}}</p>
+        <p>{{n.camada}}</p>
+    {% endfor %}
+{% endblock %}
+
+Ahora procedemos a colocar todos esos datos dentro de una tabla, por medio de la etiqueta table, le colocamos un nombre a esa tabla, por medio de
+class="table"
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>nombre</th>
+            <th>camada</th>
+        </tr>
+    <thead>
+    <tbody>
+        {% for n in cursos %}
+        <tr>
+            <th scope="row">{{n.id}}</th>
+            <td>{{n.nombre}}</th>
+            <td>{{n.camada}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+La TABLA esta compuesta por dos etiquetas importantes: thead que es la cabeza, el encabezado, y tbody, que es el contenido. El for va dentro de este, porque quiero generar una fila por cada vuelta.
+Dentro del tbody tenemos el table row (tr) que es una fila de la tabla. Y dentro de cada fila está compuesta por data de la tabla (td)
+
+El código quedaría de la siguiente manera:
+{% extends "padre.html" %}
+{% load static %}
+{% block contenido %}
+    <main class="container">
+        <h1 class="text-center"> Cursos </h1> //las clases son estilos especificos para distintas etiquetas
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>nombre</th>
+                    <th>camada</th>
+                </tr>
+            <thead>
+            <tbody>
+                {% for n in cursos %}
+                <tr>
+                    <th scope="row">{{n.id}}</th>
+                    <td>{{n.nombre}}</th>
+                    <td>{{n.camada}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+        
+{% endblock %}
+
+NAVBAR
+Dentro de esta tenemos etiquetas div y a.
+a: son enlaces, puedo hacer un enlace a páginas externas o internas
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Dentro de la clase definida en models, se definen los campos utilizando los diferentes tipos de campos
+proporcionados por Django, estos son:
+1. AutoField: Un campo de entero que se incrementa automáticamente.
+2. BigAutoField: Un campo de entero grande que se incrementa automáticamente.
+3. BigIntegerField: Almacena enteros más grandes que los que se pueden almacenar en IntegerField.
+4. BinaryField: Almacena datos binarios.
+5. BooleanField: Almacena valores booleanos (True/False).
+6. CharField: Almacena cadenas de texto de longitud fija.
+7. DateField: Almacena fechas (sin hora).
+8. DateTimeField: Almacena fechas y horas.
+9. DecimalField: Almacena números decimales precisos.
+10. DurationField: Almacena una duración de tiempo.
+11. EmailField: Almacena direcciones de correo electrónico.
+12. FileField: Almacena archivos subidos.
+13. FloatField: Almacena números de punto flotante.
+14. ForeignKey: Define una relación many-to-one con otro modelo.
+15. GenericIPAddressField: Almacena direcciones IP genéricas, permitiendo IPv4 o IPv6.
+16. IPAddressField: Almacena direcciones IP IPv4.
+17. ImageField: Similar a FileField, pero se utiliza específicamente para imágenes.
+18. IntegerField: Almacena números enteros.
+19. JSONField: Almacena datos en formato JSON.
+20. ManyToManyField: Define una relación many-to-many con otro modelo.
+21. NullBooleanField: Almacena valores booleanos, permitiendo también valores nulos.
+22. PositiveIntegerField: Almacena enteros positivos.
+23. PositiveSmallIntegerField: Almacena enteros positivos más pequeños.
+24. SlugField: Almacena cadenas de texto cortas, generalmente utilizadas para URLs amigables.
+25. SmallAutoField: Un campo de entero pequeño que se incrementa automáticamente.
+26. SmallIntegerField: Almacena números enteros más pequeños.
+27. TextField: Almacena cadenas de texto de longitud variable.
+28. TimeField: Almacena horas.
+29. URLField: Almacena URLs, validando su formato.
+30. UUIDField: Almacena identificadores únicos universales (UUIDs).
+31. ArrayField: Almacena arrays de datos en una base de datos PostgreSQL.
+32. BinaryField: Almacena datos binarios.
+33. DurationField: Almacena una duración de tiempo.
+34. JSONField: Almacena datos en formato JSON.
+35. HStoreField: Almacena datos clave-valor en una base de datos PostgreSQL.
+  
+Funciones que se utilizan en el archivo urls.py de Django para definir las
+URLS patterns:
+1. path: Define una ruta de URL en Django, especificando el patrón de URL y la vista asociada.
+2. re_path: Similar a path, pero permite el uso de expresiones regulares en el patrón de URL.
+3. url: Versión obsoleta de la función path, proporcionada por versiones anteriores de Django.
+4. reverse: Genera una URL a partir de un nombre de URL y, opcionalmente, argumentos de URL.
+5. resolve: Encuentra la vista asociada a una URL específica.
+6. redirect: Redirige a una nueva URL.
+7. include: Incluye un conjunto de rutas de URL desde otro archivo de URLconf.
+8. path converters: Clases que permiten convertir segmentos de URL en valores de Python.
+9. register_converter: Registra un convertidor personalizado para su uso en las rutas de URL.
+10. converters: Módulo que contiene convertidores de URL incorporados y personalizados.
+11. reverse_lazy: Similar a reverse, pero la resolución de la URL se aplaza hasta que sea necesaria.
+12. get_resolver: Devuelve el objeto ResolverMatch asociado a una solicitud de URL.
+13. set_urlconf: Establece el archivo de URLconf que se utilizará para resolver las URL.
+14. clear_url_caches: Borra las cachés de resolución de URL.
+15. set_script_prefix: Establece el prefijo de script utilizado para las URL generadas.
+16. get_script_prefix: Devuelve el prefijo de script actualmente configurado.
+17. i18n_patterns: Envuelve las rutas de URL en patrones i18n para la internacionalización.
+18. register_converter: Registra un convertidor personalizado para su uso en las rutas de URL.
+19. converters: Módulo que contiene convertidores de URL incorporados y personalizados.
+20. resolve: Encuentra la vista asociada a una URL específica.
+21. set_script_prefix: Establece el prefijo de script utilizado para las URL generadas.
+22. include_docs_urls: Incluye las rutas de URL de la documentación generada automáticamente.
+23. patterns (obsoleta): Versión obsoleta de path, proporcionada por versiones anteriores de Django.
+
+Funciones que se utilizan en clases que heredan de models.Model en Django:
+1. save(): Guarda o actualiza una instancia en la base de datos.
+2. delete(): Elimina una instancia de la base de datos.
+3. objects.create(): Crea una nueva instancia y la guarda en la base de datos en una sola operación.
+4. objects.all(): Devuelve todas las instancias del modelo.
+5. objects.get(): Devuelve una única instancia que cumple con ciertos criterios de filtro.
+6. objects.filter(): Devuelve un queryset con todas las instancias que cumplen con ciertos criterios de filtro.
+7. objects.exclude(): Devuelve un queryset con todas las instancias que no cumplen con ciertos criterios de filtro.
+8. objects.order_by(): Devuelve un queryset ordenado según los campos especificados.
+9. objects.values(): Devuelve un queryset con los valores de ciertos campos para cada instancia.
+10. objects.annotate(): Permite agregar campos calculados a cada instancia del queryset.
+11. objects.aggregate(): Realiza una operación de agregación en los valores de ciertos campos.
+12. objects.get_or_create(): Devuelve una instancia existente que cumple con ciertos criterios de búsqueda o crea una nueva instancia.
+13. objects.update_or_create(): Actualiza una instancia existente si se encuentra, o crea una nueva instancia.
+14. objects.count(): Devuelve el número de instancias que cumplen con ciertos criterios de filtro.
+15. objects.exists(): Devuelve un booleano indicando si existen instancias que cumplen con ciertos criterios de filtro.
+16. objects.values_list(): Devuelve un queryset con los valores de ciertos campos para cada instancia, pero como tuplas en lugar de diccionarios.
+17. objects.first(): Devuelve la primera instancia que cumple con ciertos criterios de filtro.
+18. objects.last(): Devuelve la última instancia que cumple con ciertos criterios de filtro.
+19. objects.none(): Devuelve un queryset vacío con el mismo modelo que el queryset original.
+20. objects.raw(): Ejecuta una consulta SQL cruda y devuelve instancias del modelo.
+21. objects.bulk_create(): Crea varias instancias en la base de datos en una sola operación.
+22. objects.bulk_update(): Actualiza varias instancias en la base de datos en una sola operación.
+23. objects.defer(): Retrasa la carga de ciertos campos de una instancia hasta que se acceda a ellos.
+24. objects.only(): Solo carga ciertos campos de una instancia y omite el resto.
+25. objects.values_queryset(): Devuelve un queryset con los valores de ciertos campos para cada instancia, pero como objetos QuerySet en lugar de diccionarios.
+26. objects.reverse(): Genera una URL inversa basada en el nombre de la vista y los argumentos proporcionados.
+27. objects.iterator(): Devuelve un iterador para iterar sobre las instancias devueltas por la consulta.
+28. objects.earliest(): Devuelve la instancia más antigua que cumple con ciertos criterios de filtro.
+29. objects.latest(): Devuelve la instancia más reciente que cumple con ciertos criterios de filtro.
+30. objects.in_bulk(): Devuelve un diccionario de instancias indexadas por sus claves primarias.
+31. objects.dates(): Devuelve una lista de fechas únicas para un campo de fecha específico.
+32. objects.datetimes(): Devuelve una lista de fechas y horas únicas para un campo de fecha y hora específico.

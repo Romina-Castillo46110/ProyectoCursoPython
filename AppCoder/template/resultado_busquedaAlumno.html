@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block contenido %}
+
+    {% if alumnos %}
+        <ul>
+        {% for alumno in alumnos %}
+            <li>Nombre: {{alumno.nombre}}</li>
+            <li>Legajo: {{alumno.legajo}}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No se encontraron alumnos con ese nombre</p>
+    {% endif %}
+
+
+{% endblock %}
